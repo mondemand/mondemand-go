@@ -59,7 +59,7 @@ func (st *StatsMsg) ToLwes() *lwes.LwesEvent {
 
 	event.Set("num", uint16(len(st.Metrics)))
 	for idx, metric := range st.Metrics {
-		event.Set(getK("t", idx), metric.Typ)
+		event.Set(getK("t", idx), string(metric.Typ))
 		event.Set(getK("k", idx), metric.Key)
 		event.Set(getK("v", idx), metric.Value)
 	}
