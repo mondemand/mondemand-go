@@ -83,6 +83,9 @@ func decodeMetrics(event *lwes.LwesEvent) []*Metric {
 	for i := 0; i < numMetrics; i++ {
 		key := event.Attrs[getK("k", i)].(string)
 		typ := event.Attrs[getK("t", i)].(string)
+		if typ == "statset" {
+			continue
+		}
 		value := event.Attrs[getK("v", i)].(int64)
 		metrics = append(metrics, &Metric{
 			Key:   key,
