@@ -4,5 +4,7 @@ type MessageType string
 
 const (
 	StatMsg = MessageType("MonDemand::StatsMsg")
-	PerMsg  = MessageType("MonDemand::PerfMsg")
+	StatsMsgType = MessageType("MonDemand::StatsMsg")
+	PerfMsgType  = MessageType("MonDemand::PerfMsg")
+	TraceMsgType = MessageType("MonDemand::TraceMsg")
 )
