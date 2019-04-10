@@ -16,12 +16,12 @@ type TraceMsg struct {
 	Owner string
 	Hostname string
 	Message string
-	Extra map[string]string
+	Extra map[string]interface{}
 }
 
 func DecodeTraceMsg(event *lwes.LwesEvent) TraceMsg {
 	msg := TraceMsg{
-		Extra: make(map[string]string),
+		Extra: make(map[string]interface{}),
 	}
 
 	for k, v := range event.Attrs {
@@ -37,7 +37,7 @@ func DecodeTraceMsg(event *lwes.LwesEvent) TraceMsg {
 		case MessageLabel:
 			msg.Message = v.(string)
 		default:
-			msg.Extra[k] = v.(string)
+			msg.Extra[k] = v
 		}
 	}
 	return msg
