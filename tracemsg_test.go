@@ -24,7 +24,7 @@ func TestDecodeTraceMsg(t *testing.T) {
 	assert.Equal(t, "trid", trace.TraceId)
 	assert.Equal(t, "host1", trace.Hostname)
 	assert.Equal(t, "trace_message", trace.Message)
-	assert.Equal(t, map[string]string{
+	assert.Equal(t, map[string]interface{}{
 		"key1": "val2",
 	}, trace.Extra)
 }

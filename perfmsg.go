@@ -61,7 +61,7 @@ func (msg *PerfMsg) String() string {
 		toTime(msg.ReceiptTime).Format("2006-01-02T15:04:05.000Z07:00"),
 		msg.SenderIP, msg.SenderPort,
 	))
-	sb.WriteString(fmt.Sprintln("{\t%v\n", msg.CallerLabel))
+	sb.WriteString(fmt.Sprintf("{\t%v\n", msg.CallerLabel))
 	for _, tl := range msg.Timelines {
 		start, end := tl.Start, tl.End
 		sb.WriteString(fmt.Sprintf("\t%s\t%s\n\t |%s %s|\n", tl.Label, end.Sub(start),

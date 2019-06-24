@@ -2,6 +2,8 @@ package mondemand
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"github.com/lwes/lwes-go"
 )
 
@@ -11,7 +13,23 @@ const (
 	GaugeType   = MetricType("gauge")
 	CounterType = MetricType("counter")
 	UnknownType = MetricType("unknown")
+	statsetMetricsNum = 11
+	statsetSeparator = `:`
 )
+
+var statsetMetricNames = []string{
+	"count",
+	"sum",
+	"min",
+	"max",
+	"avg",
+	"p50",
+	"p75",
+	"p90",
+	"p95",
+	"p98",
+	"p99",
+}
 
 func getK(key string, idx int) string {
 	return fmt.Sprint(key, idx)
@@ -77,6 +95,41 @@ func getMetricType(typ string) MetricType {
 	return UnknownType
 }
 
+type statset [11]int64
+
+func decodeIntOrZero(value string) int64 {
+	if value == "" {
+		return 0
+	}
+	parsed, err := strconv.ParseInt(value, 0, 64)
+	if err != nil {
+		return 0
+	}
+	return parsed
+}
+
+func newStatset(value string) *statset {
+	s := statset{}
+	values := strings.SplitN(value, statsetSeparator, statsetMetricsNum)
+	for idx := range values {
+		s[idx] = decodeIntOrZero(values[idx])
+	}
+	return &s
+}
+
+func decodeStatsSetToGauges(value string, key string) []*Metric {
+	values := newStatset(value)
+	metrics := make([]*Metric, 0)
+	for idx, name := range statsetMetricNames {
+		metrics= append(metrics, &Metric{
+			Key:   fmt.Sprintf("%s_%s", key, name),
+			Typ:   GaugeType,
+			Value: values[idx],
+		})
+	}
+	return metrics
+}
+
 func decodeMetrics(event *lwes.LwesEvent) []*Metric {
 	numMetrics := int(event.Attrs["num"].(uint16))
 	metrics := make([]*Metric, 0, numMetrics)
@@ -84,14 +137,17 @@ func decodeMetrics(event *lwes.LwesEvent) []*Metric {
 		key := event.Attrs[getK("k", i)].(string)
 		typ := event.Attrs[getK("t", i)].(string)
 		if typ == "statset" {
-			continue
+			value := event.Attrs[getK("v", i)].(string)
+			metrics = append(metrics, decodeStatsSetToGauges(value, key)...)
+		} else {
+
+			value := event.Attrs[getK("v", i)].(int64)
+			metrics = append(metrics, &Metric{
+				Key:   key,
+				Typ:   getMetricType(typ),
+				Value: value,
+			})
 		}
-		value := event.Attrs[getK("v", i)].(int64)
-		metrics = append(metrics, &Metric{
-			Key:   key,
-			Typ:   getMetricType(typ),
-			Value: value,
-		})
 	}
 	return metrics
 }
